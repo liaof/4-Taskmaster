@@ -47,10 +47,11 @@ var saveTasks = function() {
 
 //jQuery delegated event listener
 //alternative to an if(event.target.matches()){} inside the listener function
+//here it checks for clicks on <p> elements in .list-group
 $(".list-group").on("click", "p", function() {
   //you can chain multiple jQuery and js methods 
 
-  //get the inner textxt content of the current element, represented by $(this)
+  //get the inner textext content of the current element, represented by $(this)
   //.trim() removes the white spaces before and after
   var text = $(this).text().trim();
   //create a text input element of the class .form-control, then give it the value of the text variable defined above
@@ -90,12 +91,13 @@ $(".list-group").on("click", "span", function() {
               .trim();
 
   // create new input element
+  //<text class = "form-control">date</text>
   var dateInput = $("<input>")
                   .attr("type", "text")
                   .addClass("form-control")
                   .val(date);
 
-  // swap out elements
+  // swap out elements(replace textbox with text input)
   $(this).replaceWith(dateInput);
 
   // automatically focus on new element

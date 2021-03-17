@@ -69,7 +69,9 @@ $(".list-group").on("blur", "textarea", function() {
 
   // get the parent ul's id attribute
   //.replace("list-", "") removes the 'list-' part of our category name eg. list-toDo -> toDo
-  var status = $(this).closest(".list-group").attr("id").replace("list-", "");
+  var status = $(this).closest(".list-group")
+                .attr("id")
+                .replace("list-", "");
 
   // get the task's position in the list of other li elements
   var index = $(this).closest(".list-group-item").index();
@@ -181,6 +183,77 @@ $("#remove-tasks").on("click", function() {
   }
   saveTasks();
 });
+
+$(".card .list-group").sortable({
+  //define the elements our .card can attach to, other .card in case of an existant list, .list-group in case it's empty
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  //creates a clone to drag instead of the original, to prevent any unwanted clicks and events
+  helper: "clone",
+  //the below are additional listeners
+  //triggers when beginning drag
+  activate: function(event){
+    console.log("activate", this);
+  },
+  //triggers when mouse is let go, ending drag
+  deactivate: function(event){
+    console.log("deactivate", this);
+  },
+  //triggers when dragging something into an element
+  over: function (event){
+    console.log("over"), event.target;
+  },
+  //triggers when contents of a list have been changed
+  update: function(event){
+    // temp array to store the task data that was just dragged and dropped
+    var tempArr = [];
+    // loop over current set of children in sortable list
+  $(this).children().each(function() {
+    var text = $(this)
+      .find("p")
+      .text()
+      .trim();
+
+    var date = $(this)
+      .find("span")
+      .text()
+      .trim();
+
+    //add task data to the temp array as an object
+    tempArr.push({
+      text: text,
+      date: date
+    });
+
+    console.log(tempArr);
+    // trim down the ul's ID to match object property
+    console.log(this);
+    var arrName = $(this).parent()
+      .attr("id")
+      .replace("list-", "");
+
+    // update array on tasks object and save
+    tasks[arrName] = tempArr;
+    saveTasks();
+  });
+}
+});
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    console.log("drop");
+    //removes element from the DOM entirely
+    ui.draggable.remove();
+  },
+  over: function(event, ui) {
+    console.log("over");
+  },
+  out: function(event, ui) {
+    console.log("out");
+  }
+})
 
 // load tasks for the first time
 loadTasks();

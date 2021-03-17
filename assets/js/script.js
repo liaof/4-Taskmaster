@@ -62,6 +62,7 @@ $(".list-group").on("click", "p", function() {
   textInput.trigger("focus");
 });
 
+//edit field was unfocused
 $(".list-group").on("blur", "textarea", function() {
   // get the textarea's current value/text
   var text = $(this).val().trim();

@@ -13,6 +13,8 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+   // check due date
+   auditTask(taskLi);
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -103,12 +105,26 @@ $(".list-group").on("click", "span", function() {
   // swap out elements(replace textbox with text input)
   $(this).replaceWith(dateInput);
 
+  // enable jquery ui date picker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+
+      // when calendar is closed, force a "change" event
+      //make it trigger 'change' upon closing because we got rid of the click listener
+      //when we replaced the text input with a datepicker
+      //this allows $(".list-group").on("change", "input[type='text']", function() to trigger upon clicking away from the datepicker 
+      $(this).trigger("change");
+    }
+  });
+
   // automatically focus on new element
   dateInput.trigger("focus");
 });
 
 // value of due date was changed
-$(".list-group").on("blur", "input[type='text']", function() {
+// aka there is a difference between the span's value and the input's value
+$(".list-group").on("change", "input[type='text']", function() {
   // get current text
   var date = $(this)
     .val()
@@ -136,6 +152,10 @@ $(".list-group").on("blur", "input[type='text']", function() {
 
   // replace input with span element
   $(this).replaceWith(taskSpan);
+  auditTask($(taskSpan).closest(".list-group-item"));
+
+  // Pass task's <li> element into auditTask() to check new due date
+  auditTask($(taskSpan).closest(".list-group-item"));
 });
 
 
@@ -254,6 +274,34 @@ $("#trash").droppable({
     console.log("out");
   }
 })
+
+$("#modalDueDate").datepicker({
+  minDate: 1,
+});
+
+var auditTask = function(taskEl) {
+  // get date from task element
+  var date = $(taskEl).find("span").text().trim();
+  // to ensure element is getting to the function
+  
+  // convert to moment object at 5:00pm
+  //date, "L" = local date, defaults to 12am
+  //.set("hour, 17") sets the time to 5pm, because its 17 hours from 12am
+  var time = moment(date, "L").set("hour", 17);
+ 
+  // remove any old classes from element
+  //.list-group-item-danger is the Bootstrap class for all tasks near/over due date
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+  
+  // apply new Bootstrap class if task is near/over due date
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  }
+  else if (Math.abs(moment().diff(time, "days"))<=2){
+    $(taskEl).addClass("list-group-item-warning");
+  }
+  
+};
 
 // load tasks for the first time
 loadTasks();
